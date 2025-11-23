@@ -4,15 +4,80 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión</title>
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        /* Contenedor del formulario */
+        .login-container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        /* Título */
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        /* Estilo de los campos de entrada */
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+        }
+
+        /* Estilo del botón de submit */
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Estilos de los mensajes de error */
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Iniciar Sesión</h1>
-
-    <form id="loginForm">
-        <input type="text" id="username" placeholder="Usuario" required><br><br>
-        <input type="password" id="password" placeholder="Contraseña" required><br><br>
-        <button type="submit">Iniciar sesión</button>
-    </form>
+    <div class="login-container">
+        <h1>Iniciar Sesión</h1>
+        <form id="loginForm">
+            <input type="text" id="username" placeholder="Usuario" required><br><br>
+            <input type="password" id="password" placeholder="Contraseña" required><br><br>
+            <button type="submit">Iniciar sesión</button>
+        </form>
+        <div id="errorMessage" class="error-message"></div>
+    </div>
 
     <script>
         // Función para realizar el login
@@ -24,7 +89,7 @@
 
             // Verificar si las credenciales están presentes
             if (!username || !password) {
-                alert('Por favor ingresa el nombre de usuario y la contraseña.');
+                showError('Por favor ingresa el nombre de usuario y la contraseña.');
                 return;
             }
 
@@ -34,10 +99,9 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ username, password }),
-});
-
+                    },
+                    body: JSON.stringify({ username, password }),
+                });
 
                 const data = await response.json();
                 console.log(data);  // Verifica la respuesta de la API en la consola
@@ -47,13 +111,19 @@
                     localStorage.setItem('access_token', data.access);
                     window.location.href = 'contactos.html';  // Redirigir a la página de contactos
                 } else {
-                    alert('Credenciales incorrectas');
+                    showError('Credenciales incorrectas');
                 }
             } catch (error) {
                 // Manejo de errores en la solicitud
                 console.error('Error al realizar la solicitud de login:', error);
-                alert('Hubo un problema al intentar iniciar sesión. Intenta de nuevo.');
+                showError('Hubo un problema al intentar iniciar sesión. Intenta de nuevo.');
             }
+        }
+
+        // Función para mostrar el mensaje de error
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
         }
 
         // Añadir evento al formulario para capturar el submit
