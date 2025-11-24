@@ -4,15 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión</title>
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <h1>Iniciar Sesión</h1>
 
-    <form id="loginForm">
-        <input type="text" id="username" placeholder="Usuario" required><br><br>
-        <input type="password" id="password" placeholder="Contraseña" required><br><br>
-        <button type="submit">Iniciar sesión</button>
-    </form>
+    <div class="login-container">
+        <h1>Iniciar Sesión</h1>
+
+        <form id="loginForm">
+            <input type="text" id="username" placeholder="Usuario" required><br>
+            <input type="password" id="password" placeholder="Contraseña" required><br>
+            <button type="submit">Iniciar sesión</button>
+        </form>
+
+        <div class="error-message" id="errorMessage">Credenciales incorrectas. Intenta de nuevo.</div> <!-- Área para mostrar errores -->
+    </div>
 
     <script>
         // Función para realizar el login
@@ -46,13 +52,20 @@
                     localStorage.setItem('access_token', data.access);
                     window.location.href = 'contactos.html';  // Redirigir a la página de contactos
                 } else {
-                    alert('Credenciales incorrectas');
+                    showError('Credenciales incorrectas');
                 }
             } catch (error) {
                 // Manejo de errores en la solicitud
                 console.error('Error al realizar la solicitud de login:', error);
-                alert('Hubo un problema al intentar iniciar sesión. Intenta de nuevo.');
+                showError('Hubo un problema al intentar iniciar sesión. Intenta de nuevo.');
             }
+        }
+
+        // Función para mostrar el mensaje de error
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
         }
 
         // Añadir evento al formulario para capturar el submit
