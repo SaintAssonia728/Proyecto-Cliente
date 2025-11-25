@@ -3,79 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de Contactos</title>
-    <link rel="stylesheet" href="css/styless.css">
-
+    <title>CRUD Contactos</title>
 </head>
 <body>
-    <div class="container">
-        <h1>Lista de Contactos</h1>
-        <ul id="contactosList"></ul>
-        <div id="errorMessage" class="error"></div>
+
+    <h1>CRUD de Contactos</h1>
+
+    <div id="errorMessage"></div>
+
+    <button onclick="mostrarCrear()">Crear Contacto</button>
+
+    <h2>Lista de Contactos</h2>
+    <ul id="contactosList"></ul>
+
+    <!-- FORMULARIO CREAR -->
+    <div id="formCrear" style="display:none;">
+        <h3>Crear Contacto</h3>
+        <form onsubmit="crearContacto(event)">
+            <input type="text" id="crear_nombre" placeholder="Nombre" required>
+            <input type="email" id="crear_correo" placeholder="Correo" required>
+            <input type="text" id="crear_telefono" placeholder="Teléfono" required>
+            <input type="text" id="crear_direccion" placeholder="Dirección" required>
+            <button type="submit">Guardar</button>
+            <button type="button" onclick="ocultarCrear()">Cancelar</button>
+        </form>
+    </div>
+
+    <!-- FORMULARIO EDITAR -->
+    <div id="formEditar" style="display:none;">
+        <h3>Editar Contacto</h3>
+        <form onsubmit="editarContacto(event)">
+            <input type="hidden" id="editar_id">
+            <input type="text" id="editar_nombre" placeholder="Nombre" required>
+            <input type="email" id="editar_correo" placeholder="Correo" required>
+            <input type="text" id="editar_telefono" placeholder="Teléfono" required>
+            <input type="text" id="editar_direccion" placeholder="Dirección" required>
+            <button type="submit">Actualizar</button>
+            <button type="button" onclick="ocultarEditar()">Cancelar</button>
+        </form>
     </div>
 
     <script>
-        const apiUrl = 'http://localhost:8000/api/contactos/'; // URL local de la API
+        const apiUrl = "http://localhost:8000/api/contactos/";
 
-        // Verificar si el usuario está autenticado
+        // Verificar autenticación
         if (!localStorage.getItem('access_token')) {
-            console.log('No hay token, redirigiendo...');
-            window.location.href = 'index.html';  // Redirigir al login si no está autenticado
+            window.location.href = 'index.html';
         } else {
-            fetchContactos();  // Solo ejecutar si el usuario está autenticado
+            fetchContactos();
         }
 
-        // Función para obtener los contactos
+        // ---- LISTAR CONTACTOS ----
         async function fetchContactos() {
             try {
                 const response = await fetch(apiUrl, {
-                    method: 'GET',
+                    method: "GET",
                     headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('access_token'), // Autenticación con el token
+                        "Authorization": "Bearer " + localStorage.getItem("access_token")
                     }
                 });
 
-                // Verificar si la respuesta fue exitosa
                 if (!response.ok) {
-                    throw new Error('Error al obtener los contactos: ' + response.statusText);
+                    throw new Error("Error al obtener contactos");
                 }
 
                 const data = await response.json();
-                console.log('Datos obtenidos:', data); // Verificar los datos completos
+                const contactosList = document.getElementById("contactosList");
+                contactosList.innerHTML = "";
 
-                if (data.results && data.results.length > 0) {
-                    const contactos = data.results;
-                    const contactosList = document.getElementById('contactosList');
-
-                    // Limpiar la lista antes de llenarla
-                    contactosList.innerHTML = '';
-
-                    // Crear la lista de contactos
-                    contactos.forEach(contacto => {
-                        console.log('Contacto:', contacto); // Verificar cada contacto individualmente
-                        const listItem = document.createElement('li');
-                        listItem.innerHTML = ` 
-                            <strong>${contacto.nombre}</strong> - ${contacto.correo}
-                            <span class="contacto-info">${contacto.telefono}</span>
-                            <span class="contacto-info">${contacto.direccion}</span>
-                        `;
-                        contactosList.appendChild(listItem);
-                    });
-                } else {
-                    showError('No hay contactos disponibles.');
-                }
+                data.results.forEach(contacto => {
+                    const li = document.createElement("li");
+                    li.innerHTML = `
+                        <strong>${contacto.nombre}</strong> - ${contacto.correo} <br>
+                        ${contacto.telefono} - ${contacto.direccion}
+                        <br>
+                        <button onclick="mostrarEditar(${contacto.id}, '${contacto.nombre}', '${contacto.correo}', '${contacto.telefono}', '${contacto.direccion}')">Editar</button>
+                        <button onclick="eliminarContacto(${contacto.id})">Eliminar</button>
+                    `;
+                    contactosList.appendChild(li);
+                });
 
             } catch (error) {
-                console.error('Error al obtener los contactos:', error);
-                showError('Ocurrió un error al cargar los contactos.');
+                showError(error.message);
             }
         }
 
-        // Función para mostrar mensaje de error
+        // ---- CREAR CONTACTO ----
+        function mostrarCrear() {
+            document.getElementById("formCrear").style.display = "block";
+        }
+
+        function ocultarCrear() {
+            document.getElementById("formCrear").style.display = "none";
+        }
+
+        async function crearContacto(event) {
+            event.preventDefault();
+            const data = {
+                nombre: document.getElementById("crear_nombre").value,
+                correo: document.getElementById("crear_correo").value,
+                telefono: document.getElementById("crear_telefono").value,
+                direccion: document.getElementById("crear_direccion").value
+            };
+
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + localStorage.getItem("access_token")
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                ocultarCrear();
+                fetchContactos();
+            } else {
+                showError("Error al crear contacto");
+            }
+        }
+
+        // ---- EDITAR CONTACTO ----
+        function mostrarEditar(id, nombre, correo, telefono, direccion) {
+            document.getElementById("formEditar").style.display = "block";
+
+            document.getElementById("editar_id").value = id;
+            document.getElementById("editar_nombre").value = nombre;
+            document.getElementById("editar_correo").value = correo;
+            document.getElementById("editar_telefono").value = telefono;
+            document.getElementById("editar_direccion").value = direccion;
+        }
+
+        function ocultarEditar() {
+            document.getElementById("formEditar").style.display = "none";
+        }
+
+        async function editarContacto(event) {
+            event.preventDefault();
+
+            const id = document.getElementById("editar_id").value;
+            const data = {
+                nombre: document.getElementById("editar_nombre").value,
+                correo: document.getElementById("editar_correo").value,
+                telefono: document.getElementById("editar_telefono").value,
+                direccion: document.getElementById("editar_direccion").value
+            };
+
+            const response = await fetch(apiUrl + id + "/", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + localStorage.getItem("access_token")
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                ocultarEditar();
+                fetchContactos();
+            } else {
+                showError("Error al actualizar contacto");
+            }
+        }
+
+        // ---- ELIMINAR CONTACTO ----
+        async function eliminarContacto(id) {
+            if (!confirm("¿Seguro que deseas eliminar este contacto?")) return;
+
+            const response = await fetch(apiUrl + id + "/", {
+                method: "DELETE",
+                headers: {
+                    "Authorization": "Bearer " + localStorage.getItem("access_token")
+                }
+            });
+
+            if (response.ok) {
+                fetchContactos();
+            } else {
+                showError("Error al eliminar contacto");
+            }
+        }
+
+        // ---- ERROR ----
         function showError(message) {
-            const errorMessage = document.getElementById('errorMessage');
-            errorMessage.textContent = message;
+            document.getElementById("errorMessage").innerText = message;
         }
     </script>
+
 </body>
 </html>
