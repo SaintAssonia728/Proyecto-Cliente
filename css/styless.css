@@ -1,169 +1,43 @@
-/* Estilos personalizados para la lista de contactos (complementa Bootstrap)
-   Guarda este archivo en: css/styles.css
-   Asegúrate de incluirlo en tu <head> después del CSS de Bootstrap:
-   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-   <link rel="stylesheet" href="css/styles.css">
-*/
+/* Guardar como css/styles.css */
+/* Complemento visual para que las cards se vean bien en dispositivos pequeños y grandes */
 
 :root{
-  --bg: #f5f7fb;
+  --card-radius: 12px;
   --card-bg: #ffffff;
-  --muted: #6c757d;
-  --primary: #0d6efd;
-  --accent: #e9f2ff;
-  --radius: 10px;
-  --shadow: 0 6px 18px rgba(13,110,253,0.06);
-  --max-width: 1100px;
-  --gutter: 1rem;
-  font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
 }
 
-/* Página */
+/* Body */
 body {
-  background: var(--bg);
-  color: #212529;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  padding: 2rem 1rem;
+  background: #f7f9fc;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
 }
 
-.container {
-  max-width: var(--max-width);
-}
-
-/* Header / botones */
-.d-flex.align-items-center.justify-content-between.mb-4 h1 {
-  font-weight: 600;
-  color: #0b1a2b;
-}
-.btn-primary {
-  background: linear-gradient(180deg,var(--primary), #0b5ed7);
-  border: none;
-  box-shadow: none;
-}
-
-/* Alert container spacing */
-#alertContainer { margin-bottom: 1rem; }
-
-/* Grid responsivo para cards */
-#contactosList {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1rem;
-  align-items: start;
-  margin-top: 0.5rem;
-}
-
-/* Card */
+/* Contact card */
 .card-contact {
-  background: linear-gradient(180deg, var(--card-bg), #fbfdff);
-  border: 1px solid rgba(15,23,42,0.04);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  transition: transform .14s ease, box-shadow .14s ease;
-  overflow: hidden;
-  height: 100%;
+  border-radius: var(--card-radius);
+  transition: transform .12s ease, box-shadow .12s ease;
+  box-shadow: 0 6px 18px rgba(13,110,253,0.06);
+}
+.card-contact:hover { transform: translateY(-6px); box-shadow: 0 14px 36px rgba(13,110,253,0.08); }
+
+/* Truncate long text and keep layout tidy */
+.card-text.text-truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Action buttons */
+.card-actions .btn { min-width: 90px; }
+
+/* On very small screens stack actions full-width */
+@media (max-width: 575.98px) {
+  .card-contact .card-body { gap: .75rem; }
+  .card-actions { width:100%; display:flex; gap:.5rem; }
+  .card-actions .btn { flex:1 1 auto; }
 }
 
-.card-contact:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 12px 30px rgba(13,110,253,0.08);
-}
+/* Modal content tweaks for mobile */
+.modal-fullscreen-sm-down .modal-content { border-radius: 0; }
 
-.card-contact .card-body {
-  padding: 1rem;
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  align-items: flex-start;
-}
+/* Ensure form invalid-feedback appears */
+.invalid-feedback { display:block; }
 
-/* Info texto */
-.card-title {
-  margin-bottom: 0.25rem;
-  font-size: 1.05rem;
-  font-weight: 600;
-}
-
-.card-text {
-  color: var(--muted);
-  font-size: 0.92rem;
-  margin-bottom: 0.25rem;
-}
-
-/* Actions */
-.card-contact .actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  align-items: flex-end;
-  min-width: 120px;
-}
-
-/* Botones en cards */
-.card-contact .btn {
-  min-width: 110px;
-  font-size: 0.85rem;
-}
-
-/* Loading */
-#loading { margin-top: 1.5rem; }
-
-/* Formularios (modales) */
-.modal .form-label { font-weight: 600; }
-.modal .form-control { border-radius: 8px; }
-.modal .modal-content { border-radius: 12px; }
-
-/* Mostrar mensajes de validación dentro del modal */
-.modal .invalid-feedback { display: block; }
-
-/* Inputs con icono (si agregas posteriormente) */
-.input-group .form-control { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
-
-/* Small screen adjustments */
-@media (max-width: 576px) {
-  body { padding: 1rem; }
-  .card-contact .card-body {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .card-contact .actions {
-    flex-direction: row;
-    justify-content: flex-start;
-    gap: 0.5rem;
-    margin-top: 0.75rem;
-    align-items: center;
-  }
-  .card-contact .actions .btn {
-    min-width: 0;
-    flex: 1 1 auto;
-  }
-  .d-flex.align-items-center.justify-content-between.mb-4 {
-    flex-direction: column;
-    gap: 0.75rem;
-    align-items: stretch;
-  }
-}
-
-/* Medium screens: hacer botones más compactos */
-@media (min-width: 577px) and (max-width: 900px) {
-  .card-contact .actions { min-width: 100px; }
-}
-
-/* Field-specific helper styles (form feedback) */
-.invalid-feedback[data-field] {
-  font-size: 0.87rem;
-  color: #dc3545;
-}
-
-/* Utilities */
-.text-muted-small { font-size: 0.9rem; color: var(--muted); }
-
-/* Accessibility - focus states */
-.btn:focus, .form-control:focus {
-  box-shadow: 0 0 0 0.15rem rgba(13,110,253,0.18);
-  outline: none;
-}
-
-/* Footer spacing if needed */
-.footer-space { height: 36px; }
+/* Small utility spacing tweaks */
+.container { max-width: 1200px; }
