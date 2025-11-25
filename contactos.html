@@ -3,69 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRUD Contactos</title>
+    <title>Lista de Contactos</title>
+    <link rel="stylesheet" href="css/styless.css">
 </head>
 <body>
 
-    <h1>CRUD de Contactos</h1>
+    <div class="container">
+        <h1>Lista de Contactos</h1>
 
-    <div id="errorMessage"></div>
+        <button id="btnCrear" class="btn">Crear Contacto</button>
 
-    <button onclick="mostrarCrear()">Crear Contacto</button>
-
-    <h2>Lista de Contactos</h2>
-    <ul id="contactosList"></ul>
+        <ul id="contactosList"></ul>
+        <div id="errorMessage" class="error"></div>
+    </div>
 
     <!-- FORMULARIO CREAR -->
-    <div id="formCrear" style="display:none;">
-        <h3>Crear Contacto</h3>
-        <form onsubmit="crearContacto(event)">
-            <input type="text" id="crear_nombre" placeholder="Nombre" required>
-            <input type="email" id="crear_correo" placeholder="Correo" required>
-            <input type="text" id="crear_telefono" placeholder="Teléfono" required>
-            <input type="text" id="crear_direccion" placeholder="Dirección" required>
-            <button type="submit">Guardar</button>
-            <button type="button" onclick="ocultarCrear()">Cancelar</button>
-        </form>
+    <div id="formCrear" class="modal" style="display:none;">
+        <div class="modal-content">
+            <h3>Crear Contacto</h3>
+            <form onsubmit="crearContacto(event)">
+                <input type="text" id="crear_nombre" placeholder="Nombre" required>
+                <input type="email" id="crear_correo" placeholder="Correo" required>
+                <input type="text" id="crear_telefono" placeholder="Teléfono" required>
+                <input type="text" id="crear_direccion" placeholder="Dirección" required>
+                <button type="submit">Guardar</button>
+                <button type="button" onclick="cerrarCrear()">Cancelar</button>
+            </form>
+        </div>
     </div>
 
     <!-- FORMULARIO EDITAR -->
-    <div id="formEditar" style="display:none;">
-        <h3>Editar Contacto</h3>
-        <form onsubmit="editarContacto(event)">
-            <input type="hidden" id="editar_id">
-            <input type="text" id="editar_nombre" placeholder="Nombre" required>
-            <input type="email" id="editar_correo" placeholder="Correo" required>
-            <input type="text" id="editar_telefono" placeholder="Teléfono" required>
-            <input type="text" id="editar_direccion" placeholder="Dirección" required>
-            <button type="submit">Actualizar</button>
-            <button type="button" onclick="ocultarEditar()">Cancelar</button>
-        </form>
+    <div id="formEditar" class="modal" style="display:none;">
+        <div class="modal-content">
+            <h3>Editar Contacto</h3>
+            <form onsubmit="editarContacto(event)">
+                <input type="hidden" id="editar_id">
+                <input type="text" id="editar_nombre" placeholder="Nombre" required>
+                <input type="email" id="editar_correo" placeholder="Correo" required>
+                <input type="text" id="editar_telefono" placeholder="Teléfono" required>
+                <input type="text" id="editar_direccion" placeholder="Dirección" required>
+                <button type="submit">Actualizar</button>
+                <button type="button" onclick="cerrarEditar()">Cancelar</button>
+            </form>
+        </div>
     </div>
 
     <script>
-        const apiUrl = "http://localhost:8000/api/contactos/";
+        const apiUrl = 'http://localhost:8000/api/contactos/';
 
-        // Verificar autenticación
+        // VALIDAR TOKEN
         if (!localStorage.getItem('access_token')) {
             window.location.href = 'index.html';
-        } else {
-            fetchContactos();
         }
+
+        document.getElementById("btnCrear").addEventListener("click", () => {
+            document.getElementById("formCrear").style.display = "flex";
+        });
 
         // ---- LISTAR CONTACTOS ----
         async function fetchContactos() {
             try {
                 const response = await fetch(apiUrl, {
                     method: "GET",
-                    headers: {
-                        "Authorization": "Bearer " + localStorage.getItem("access_token")
-                    }
+                    headers: { "Authorization": "Bearer " + localStorage.getItem("access_token") }
                 });
 
-                if (!response.ok) {
-                    throw new Error("Error al obtener contactos");
-                }
+                if (!response.ok) throw new Error("Error al obtener contactos");
 
                 const data = await response.json();
                 const contactosList = document.getElementById("contactosList");
@@ -73,12 +76,15 @@
 
                 data.results.forEach(contacto => {
                     const li = document.createElement("li");
+                    li.classList.add("card");
                     li.innerHTML = `
-                        <strong>${contacto.nombre}</strong> - ${contacto.correo} <br>
-                        ${contacto.telefono} - ${contacto.direccion}
-                        <br>
-                        <button onclick="mostrarEditar(${contacto.id}, '${contacto.nombre}', '${contacto.correo}', '${contacto.telefono}', '${contacto.direccion}')">Editar</button>
-                        <button onclick="eliminarContacto(${contacto.id})">Eliminar</button>
+                        <strong>${contacto.nombre}</strong><br>
+                        - ${contacto.correo}<br>
+                        ${contacto.telefono}<br>
+                        ${contacto.direccion}<br><br>
+
+                        <button class="btn-edit" onclick="mostrarEditar(${contacto.id}, '${contacto.nombre}', '${contacto.correo}', '${contacto.telefono}', '${contacto.direccion}')">Editar</button>
+                        <button class="btn-delete" onclick="eliminarContacto(${contacto.id})">Eliminar</button>
                     `;
                     contactosList.appendChild(li);
                 });
@@ -88,17 +94,12 @@
             }
         }
 
+        fetchContactos();
+
         // ---- CREAR CONTACTO ----
-        function mostrarCrear() {
-            document.getElementById("formCrear").style.display = "block";
-        }
-
-        function ocultarCrear() {
-            document.getElementById("formCrear").style.display = "none";
-        }
-
         async function crearContacto(event) {
             event.preventDefault();
+
             const data = {
                 nombre: document.getElementById("crear_nombre").value,
                 correo: document.getElementById("crear_correo").value,
@@ -116,16 +117,18 @@
             });
 
             if (response.ok) {
-                ocultarCrear();
+                cerrarCrear();
                 fetchContactos();
-            } else {
-                showError("Error al crear contacto");
-            }
+            } else showError("Error al crear contacto");
+        }
+
+        function cerrarCrear() {
+            document.getElementById("formCrear").style.display = "none";
         }
 
         // ---- EDITAR CONTACTO ----
         function mostrarEditar(id, nombre, correo, telefono, direccion) {
-            document.getElementById("formEditar").style.display = "block";
+            document.getElementById("formEditar").style.display = "flex";
 
             document.getElementById("editar_id").value = id;
             document.getElementById("editar_nombre").value = nombre;
@@ -134,7 +137,7 @@
             document.getElementById("editar_direccion").value = direccion;
         }
 
-        function ocultarEditar() {
+        function cerrarEditar() {
             document.getElementById("formEditar").style.display = "none";
         }
 
@@ -159,11 +162,9 @@
             });
 
             if (response.ok) {
-                ocultarEditar();
+                cerrarEditar();
                 fetchContactos();
-            } else {
-                showError("Error al actualizar contacto");
-            }
+            } else showError("Error al actualizar contacto");
         }
 
         // ---- ELIMINAR CONTACTO ----
@@ -172,16 +173,11 @@
 
             const response = await fetch(apiUrl + id + "/", {
                 method: "DELETE",
-                headers: {
-                    "Authorization": "Bearer " + localStorage.getItem("access_token")
-                }
+                headers: { "Authorization": "Bearer " + localStorage.getItem("access_token") }
             });
 
-            if (response.ok) {
-                fetchContactos();
-            } else {
-                showError("Error al eliminar contacto");
-            }
+            if (response.ok) fetchContactos();
+            else showError("Error al eliminar contacto");
         }
 
         // ---- ERROR ----
