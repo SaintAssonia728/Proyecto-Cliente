@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión</title>
-    <link rel="stylesheet" href="./css/styles.css">
+    <link rel="stylesheet" href="css/styles.css">
 </head>
-<body class="login-page">
+<body>
 
     <div class="login-container">
         <h1>Iniciar Sesión</h1>
@@ -21,35 +21,25 @@
     </div>
 
     <script>
-        // Función para realizar el login
+        // ... (Tu código JavaScript de login se mantiene igual)
         async function login(event) {
             event.preventDefault(); 
-
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
-
             if (!username || !password) {
                 alert('Por favor ingresa el nombre de usuario y la contraseña.');
                 return;
             }
-
             try {
-                // APUNTA A TU BACKEND DE RENDER
+                // APUNTA A RENDER
                 const response = await fetch('https://pruebadeagenda-render.onrender.com/api/token/', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json', },
                     body: JSON.stringify({ username, password }),
                 });
-
                 const data = await response.json();
-                console.log(data); 
-
-                // Si se recibe un token, guardar y redirigir a contactos.html
                 if (data.access) {
                     localStorage.setItem('access_token', data.access);
-                    // Redirección relativa
                     window.location.href = 'contactos.html'; 
                 } else {
                     showError('Credenciales incorrectas');
@@ -59,13 +49,11 @@
                 showError('Hubo un problema al intentar iniciar sesión. Intenta de nuevo.');
             }
         }
-
         function showError(message) {
             const errorMessage = document.getElementById('errorMessage');
             errorMessage.textContent = message;
             errorMessage.style.display = 'block';
         }
-
         document.getElementById('loginForm').addEventListener('submit', login);
     </script>
 </body>
