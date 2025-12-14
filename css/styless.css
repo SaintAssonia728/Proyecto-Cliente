@@ -1,0 +1,50 @@
+/* Estilos de Contactos y Generales (Contactos.html y Chat.html) */
+:root{
+    --card-radius: 12px;
+    --card-bg: #ffffff;
+}
+
+/* Body (Sobreescribe el body del login para las otras páginas) */
+body {
+    background: #f7f9fc;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    /* Necesitas anular el display: flex; del login si no usas la clase.
+       Si el login sigue centrado, ignora esta sección y solo usa los selectores inferiores. 
+       Si el login se rompe, el problema de conflicto de body persiste.
+    */
+    display: block; 
+    height: auto;
+}
+
+/* Contact card */
+.card-contact {
+    border-radius: var(--card-radius);
+    transition: transform .12s ease, box-shadow .12s ease;
+    box-shadow: 0 6px 18px rgba(13,110,253,0.06);
+}
+.card-contact:hover { 
+    transform: translateY(-6px); 
+    box-shadow: 0 14px 36px rgba(13,110,253,0.08); 
+}
+
+/* Truncate long text and keep layout tidy */
+.card-text.text-truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Action buttons */
+.card-actions .btn { min-width: 90px; }
+
+/* On very small screens stack actions full-width */
+@media (max-width: 575.98px) {
+    .card-contact .card-body { gap: .75rem; }
+    .card-actions { width:100%; display:flex; gap:.5rem; }
+    .card-actions .btn { flex:1 1 auto; }
+}
+
+/* Modal content tweaks for mobile */
+.modal-fullscreen-sm-down .modal-content { border-radius: 0; }
+
+/* Ensure form invalid-feedback appears */
+.invalid-feedback { display:block; }
+
+/* Small utility spacing tweaks */
+.container { max-width: 1200px; }
