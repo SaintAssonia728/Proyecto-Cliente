@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión</title>
+    <base href="/PruebaDeAgenda/"> 
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -17,25 +18,24 @@
             <button type="submit">Iniciar sesión</button>
         </form>
 
-        <div class="error-message" id="errorMessage">Credenciales incorrectas. Intenta de nuevo.</div> <!-- Área para mostrar errores -->
+        <div class="error-message" id="errorMessage">Credenciales incorrectas. Intenta de nuevo.</div>
     </div>
 
     <script>
         // Función para realizar el login
         async function login(event) {
-            event.preventDefault();  // Evitar recarga de la página
+            event.preventDefault(); 
 
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
-            // Verificar si las credenciales están presentes
             if (!username || !password) {
                 alert('Por favor ingresa el nombre de usuario y la contraseña.');
                 return;
             }
 
             try {
-                // Realizar la solicitud al backend para obtener el token
+                // APUNTA A TU BACKEND DE RENDER
                 const response = await fetch('https://pruebadeagenda-render.onrender.com/api/token/', {
                     method: 'POST',
                     headers: {
@@ -45,30 +45,28 @@
                 });
 
                 const data = await response.json();
-                console.log(data);  // Verifica la respuesta de la API en la consola
+                console.log(data); 
 
-                // Si se recibe un token, guardarlo en localStorage y redirigir
+                // Si se recibe un token, guardar y redirigir a contactos.html
                 if (data.access) {
                     localStorage.setItem('access_token', data.access);
-                    window.location.href = 'contactos.html';  // Redirigir a la página de contactos
+                    // La redirección es relativa y funciona gracias a <base>
+                    window.location.href = 'contactos.html'; 
                 } else {
                     showError('Credenciales incorrectas');
                 }
             } catch (error) {
-                // Manejo de errores en la solicitud
                 console.error('Error al realizar la solicitud de login:', error);
                 showError('Hubo un problema al intentar iniciar sesión. Intenta de nuevo.');
             }
         }
 
-        // Función para mostrar el mensaje de error
         function showError(message) {
             const errorMessage = document.getElementById('errorMessage');
             errorMessage.textContent = message;
             errorMessage.style.display = 'block';
         }
 
-        // Añadir evento al formulario para capturar el submit
         document.getElementById('loginForm').addEventListener('submit', login);
     </script>
 </body>

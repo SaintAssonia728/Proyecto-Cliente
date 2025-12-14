@@ -1,0 +1,166 @@
+/* ==========================================================
+   Archivo Combinado: styles.css
+   Contiene estilos de Login y estilos de Tarjetas/Generales
+   ========================================================== */
+
+/* * ----------------------------------------------------------
+ * 1. Estilos del LOGIN (index.html)
+ * ----------------------------------------------------------
+ */
+
+/* Estilos generales */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f4f8;
+    margin: 0;
+    padding: 0;
+    /* Las propiedades de flexbox son para centrar el login */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Usamos min-height para que se estire */
+}
+
+/* Contenedor del formulario */
+.login-container {
+    width: 100%;
+    max-width: 380px;
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+/* Título */
+h1 {
+    font-size: 1.8em;
+    color: #333;
+    margin-bottom: 30px;
+    font-weight: 600;
+}
+
+/* Estilo de los campos de entrada */
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    padding: 14px;
+    margin: 12px 0;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background-color: #f9f9f9;
+    font-size: 16px;
+    transition: border-color 0.3s ease-in-out;
+}
+
+/* Efecto en el borde al enfocarse */
+input[type="text"]:focus,
+input[type="password"]:focus {
+    border-color: #007BFF;
+    outline: none;
+    background-color: #fff;
+}
+
+/* Estilo del botón de submit */
+button {
+    width: 100%;
+    padding: 14px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Estilos de los mensajes de error */
+.error-message {
+    color: #d9534f;
+    font-size: 14px;
+    margin-top: 20px;
+    display: none;
+    text-align: center;
+}
+
+/* Enlaces debajo del formulario */
+a {
+    color: #007BFF;
+    font-size: 14px;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+a:hover {
+    color: #0056b3;
+}
+
+/* Estilo responsivo de Login */
+@media (max-width: 768px) {
+    .login-container {
+        padding: 30px;
+    }
+
+    h1 {
+        font-size: 1.5em;
+    }
+}
+
+
+/* * ----------------------------------------------------------
+ * 2. Estilos de CONTACTOS/CHAT (contactos.html, chat.html)
+ * ----------------------------------------------------------
+ */
+
+:root{
+    --card-radius: 12px;
+    --card-bg: #ffffff;
+}
+
+/* Body general */
+body {
+    /* Sobreescribe el fondo si no estamos en la página de login */
+    background: #f7f9fc;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    /* Remueve la centralización forzada del login para las otras páginas */
+    display: block; 
+    height: auto;
+}
+
+/* Contact card */
+.card-contact {
+    border-radius: var(--card-radius);
+    transition: transform .12s ease, box-shadow .12s ease;
+    box-shadow: 0 6px 18px rgba(13,110,253,0.06);
+}
+.card-contact:hover { 
+    transform: translateY(-6px); 
+    box-shadow: 0 14px 36px rgba(13,110,253,0.08); 
+}
+
+/* Truncate long text and keep layout tidy */
+.card-text.text-truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Action buttons */
+.card-actions .btn { min-width: 90px; }
+
+/* On very small screens stack actions full-width */
+@media (max-width: 575.98px) {
+    .card-contact .card-body { gap: .75rem; }
+    /* Las siguientes líneas sobreescriben Bootstrap para móviles */
+    .card-actions { width:100%; display:flex; gap:.5rem; }
+    .card-actions .btn { flex:1 1 auto; }
+}
+
+/* Modal content tweaks for mobile */
+.modal-fullscreen-sm-down .modal-content { border-radius: 0; }
+
+/* Ensure form invalid-feedback appears */
+.invalid-feedback { display:block; }
+
+/* Small utility spacing tweaks */
+.container { max-width: 1200px; }
