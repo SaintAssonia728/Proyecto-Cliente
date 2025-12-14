@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="css/styles.css"> 
     
     <style>
-        /* Estilos para el contenedor del chat */
         #chat-log { 
             max-height: 450px; 
             overflow-y: scroll; 
@@ -17,16 +16,9 @@
             padding: 10px; 
             background-color: #f8f9fa;
         }
-        /* Contenedor de cada mensaje */
-        .message-container { 
-            display: flex; 
-            margin-bottom: 10px;
-        }
-        /* Alineación derecha (mis mensajes) y izquierda (otros) */
+        .message-container { display: flex; margin-bottom: 10px; }
         .message-right { justify-content: flex-end; }
         .message-left { justify-content: flex-start; }
-        
-        /* Burbuja del mensaje */
         .message-bubble { 
             padding: 8px 12px; 
             border-radius: 15px; 
@@ -34,35 +26,24 @@
             word-wrap: break-word;
             box-shadow: 0 1px 1px rgba(0,0,0,0.1);
         }
-        /* Mi mensaje */
         .my-message { 
-            background-color: #0d6efd; /* Azul de Bootstrap */
+            background-color: #0d6efd; 
             color: white; 
             margin-left: auto;
         }
-        /* Mensaje de otros */
         .other-message { 
             background-color: #ffffff; 
             color: #333; 
             border: 1px solid #dee2e6;
         }
-        /* Mensajes del sistema (conexión, etc.) */
         .system-message { 
             text-align: center; 
             font-size: 0.8em; 
             color: #6c757d; 
             margin: 5px 0; 
         }
-
-        /* Nombre de usuario */
-        .message-user { 
-            font-weight: bold; 
-            font-size: 0.85em; 
-            margin-bottom: 2px;
-        }
+        .message-user { font-weight: bold; font-size: 0.85em; margin-bottom: 2px; }
         .my-message .message-user { color: rgba(255, 255, 255, 0.7); }
-
-        /* Hora del mensaje */
         .message-time { 
             font-size: 0.7em; 
             margin-top: 2px; 
@@ -100,28 +81,29 @@
 
     <script>
         // La URL base de tu backend (la misma que usas para el API REST)
-        const API_BASE_URL = 'https://pruebadeagenda-render.onrender.com';
+        const API_BASE_URL = 'http://127.0.0.1:8000'
         const token = localStorage.getItem('access_token');
         
-        // --- Autenticación y Redirección ---
+        // --- Autenticación y Redirección CORREGIDA ---
         if (!token) {
             alert('Debes iniciar sesión para usar el chat.');
-            location.href = 'index.html';
+            // CORRECCIÓN: Redirigir a la raíz del sitio ('/') que maneja el login
+            location.href = '/'; 
         }
 
         document.getElementById('btnLogout').addEventListener('click', () => {
             localStorage.removeItem('access_token');
-            location.href = 'index.html';
+            // CORRECCIÓN: Redirigir a la raíz del sitio ('/') al cerrar sesión
+            location.href = '/'; 
         });
 
         // --- Configuración de WebSocket ---
         
-        // Convierte la URL HTTP/HTTPS a WS/WSS y apunta al endpoint de Channels.
-        // Usa `wss://` para Render (producción) o `ws://` para localhost.
+        // Convierte la URL HTTP/HTTPS a WS/WSS
         const protocol = API_BASE_URL.startsWith('https') ? 'wss' : 'ws';
         const hostname = new URL(API_BASE_URL).hostname + (new URL(API_BASE_URL).port ? ':' + new URL(API_BASE_URL).port : '');
 
-        // Conexión al endpoint de WebSocket, pasando el token como query parameter para identificación
+        // Conexión al endpoint de WebSocket
         const endpoint = `${protocol}://${hostname}/ws/chat/`; 
         
         const chatSocket = new WebSocket(
@@ -133,12 +115,10 @@
         const chatForm = document.getElementById('chat-form');
         const statusMessageEl = document.getElementById('status-message');
 
-        // Identificador del usuario local (usamos los primeros 8 caracteres del token, como en el Consumer)
-        const myIdentifier = token.substring(0, 8) + '...';
+        // Asume que el token JWT contiene la información de usuario o usa una parte del token para identificarlo
+        const myIdentifier = token ? token.substring(0, 8) + '...' : 'Anónimo';
 
-        // Función para renderizar el mensaje
         function renderMessage(data) {
-            // Manejar mensajes del sistema
             if (data.user === 'Sistema') {
                 const systemMsg = document.createElement('div');
                 systemMsg.className = 'system-message';
@@ -151,7 +131,7 @@
             const container = document.createElement('div');
             container.classList.add('message-container');
             
-            // Determinar si es mi mensaje
+            // Usamos una verificación más segura si myIdentifier existe
             const isMe = data.user === myIdentifier; 
             
             container.classList.add(isMe ? 'message-right' : 'message-left');
@@ -177,11 +157,8 @@
             container.appendChild(bubble);
             
             chatLog.appendChild(container);
-            chatLog.scrollTop = chatLog.scrollHeight; // Scroll automático
+            chatLog.scrollTop = chatLog.scrollHeight;
         }
-
-
-        // --- Eventos de WebSocket ---
 
         chatSocket.onopen = function(e) {
             console.log('WebSocket connection opened.');
@@ -206,19 +183,17 @@
             renderMessage(data);
         };
 
-        // --- Envío de mensaje ---
         chatForm.addEventListener('submit', function(e) {
             e.preventDefault();
             const message = chatInput.value.trim();
 
             if (message === '' || chatSocket.readyState !== WebSocket.OPEN) return;
 
-            // Envía el mensaje al servidor a través del WebSocket
             chatSocket.send(JSON.stringify({
                 'message': message,
             }));
 
-            chatInput.value = ''; // Limpiar el input
+            chatInput.value = '';
         });
 
     </script>
