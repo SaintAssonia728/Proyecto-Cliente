@@ -101,7 +101,7 @@
                 if (data.access) {
 
                     localStorage.setItem('access_token', data.access);
-
+                    localStorage.setItem('username', username);
                     window.location.href = 'contactos.html';  // Redirigir a la página de contactos
 
                 } else {

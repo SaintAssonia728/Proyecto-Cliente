@@ -9,6 +9,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 
   <title>Lista de Contactos</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 
 
@@ -21,6 +22,25 @@
   <link rel="stylesheet" href="css/styless.css">
 
 </head>
+<!-- CHAT EMBEBIDO -->
+<div id="chatContainer"
+     class="card position-fixed bottom-0 end-0 m-3 shadow"
+     style="width:350px; max-height:500px; display:none; z-index:1050;">
+
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <strong>Chat</strong>
+    <button id="closeChat" class="btn btn-sm btn-outline-danger">✕</button>
+  </div>
+
+  <div id="chatMessages" class="card-body" style="overflow-y:auto; height:250px;"></div>
+
+  <div class="card-footer">
+    <div class="input-group">
+      <input id="messageInput" class="form-control" placeholder="Mensaje...">
+      <button id="sendMessageBtn" class="btn btn-primary">Enviar</button>
+    </div>
+  </div>
+</div>
 
 <body>
 
@@ -39,7 +59,7 @@
         <button id="btnLogout" class="btn btn-outline-secondary">Cerrar sesión</button>
 
       </div>
-      <a href="chat.html" class="btn btn-secondary">Ir al Chat</a>
+    <button id="btnChat" class="btn btn-secondary">💬 Chat</button>
 
     </div>
 
@@ -616,6 +636,78 @@
       } catch(err){ showAlert('Error de red'); }
 
     }
+    /* =============================
+   CHAT EMBEBIDO SUPABASE
+============================= */
+const USERNAME = localStorage.getItem('username');
+if (!USERNAME) location.href = 'index.html';
+
+const supabaseClient = window.supabase.createClient(
+  'https://qvvjivdvkwsjfrxocnco.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2dmppdmR2a3dzamZyeG9jbmNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5MTQ3NDMsImV4cCI6MjA4MTQ5MDc0M30.BZpsq0szoHhsd_OgYpxsIrZrYvmx4wxZNWnuSkPTbfU'
+);
+
+const chatContainer = document.getElementById('chatContainer');
+const chatMessages = document.getElementById('chatMessages');
+const messageInput = document.getElementById('messageInput');
+const btnChat = document.getElementById('btnChat');
+const closeChat = document.getElementById('closeChat');
+
+btnChat.onclick = () => {
+  chatContainer.style.display =
+    chatContainer.style.display === 'none' ? 'block' : 'none';
+};
+
+closeChat.onclick = () => chatContainer.style.display = 'none';
+
+function formatTime(d) {
+  return new Date(d).toLocaleTimeString('es-CL', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+
+function renderMessage(m) {
+  const div = document.createElement('div');
+  div.innerHTML = `<strong>${m.username}</strong>
+    <small class="text-muted">(${formatTime(m.created_at)})</small>: ${m.text}`;
+  chatMessages.appendChild(div);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+async function loadMessages() {
+  const { data } = await supabaseClient
+    .from('chat_back')
+    .select('*')
+    .order('created_at', { ascending: true });
+
+  data.forEach(renderMessage);
+}
+
+async function sendMessage() {
+  if (!messageInput.value.trim()) return;
+
+  await supabaseClient.from('chat_back').insert({
+    user_id: USERNAME,
+    username: USERNAME,
+    text: messageInput.value
+  });
+
+  messageInput.value = '';
+}
+
+document.getElementById('sendMessageBtn').onclick = sendMessage;
+messageInput.addEventListener('keydown', e => e.key === 'Enter' && sendMessage());
+
+supabaseClient.channel('chat-realtime')
+  .on(
+    'postgres_changes',
+    { event: 'INSERT', schema: 'public', table: 'chat_back' },
+    payload => renderMessage(payload.new)
+  )
+  .subscribe();
+
+loadMessages();
 
   </script>
 
