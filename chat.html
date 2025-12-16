@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Chat en Vivo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container py-4">
+        <h1 class="h4 mb-3">Chat en Vivo</h1>
+        
+        <div id="chatMessages" class="mb-3" style="height: 300px; overflow-y: scroll; border: 1px solid #ddd; padding: 10px;">
+            <!-- Los mensajes se agregarán aquí -->
+        </div>
+
+        <div class="input-group">
+            <input type="text" id="messageInput" class="form-control" placeholder="Escribe un mensaje..." />
+            <button class="btn btn-primary" id="sendMessageBtn">Enviar</button>
+        </div>
+    </div>
+
+    <!-- Cargar la librería de Supabase al final para garantizar su disponibilidad -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/umd/supabase.min.js"></script>
+
+    <!-- Luego, tu propio código JS -->
+    <script>
+        // Asegurarse de que el código no se ejecute hasta que supabase se haya cargado correctamente
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicialización de Supabase
+            const supabaseUrl = 'https://pfxomdslkkmkjmppoyay.supabase.co';  // Tu URL de Supabase
+            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmeG9tZHNsa2tta2ptcHBveWF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA2MDYyNzIsImV4cCI6MjA3NjE4MjI3Mn0.NnjJW91J_4WMG6_qV1V4kh3l9Hep2MIUNIoDLQRYAxM';  // Tu anon key
+            const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+            // Función para renderizar los mensajes
+            function renderMessage(message) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('mb-2');
+                messageElement.innerHTML = `<strong>${message.username || 'Anónimo'}</strong>: ${message.text}`;
+                document.getElementById('chatMessages').appendChild(messageElement);
+                document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+            }
+
+            // Escuchar mensajes en tiempo real
+            supabase
+                .from('messages')
+                .on('INSERT', payload => {
+                    renderMessage(payload.new);
+                })
+                .subscribe();
+
+            // Enviar un mensaje
+            document.getElementById('sendMessageBtn').addEventListener('click', async () => {
+                const messageInput = document.getElementById('messageInput');
+                const message = messageInput.value.trim();
+
+                if (message) {
+                    const { user, error } = await supabase.auth.getUser();
+                    if (error) {
+                        alert('Por favor, inicia sesión para enviar mensajes');
+                        return;
+                    }
+
+                    // Obtener user_id y username
+                    const userId = user?.id; // El UUID del usuario autenticado
+                    const username = user?.email || 'Anónimo'; // El nombre del usuario (puedes cambiar esto a un nombre personalizado)
+
+                    const { error: insertError } = await supabase
+                        .from('messages')
+                        .insert([
+                            { user_id: userId, username: username, type: 'message', text: message }
+                        ]);
+
+                    if (insertError) {
+                        console.error(insertError);
+                        alert('Hubo un error al enviar el mensaje');
+                    } else {
+                        messageInput.value = ''; // Limpiar el campo de mensaje
+                    }
+                }
+            });
+
+            // Cargar mensajes previos
+            async function loadMessages() {
+                const { data, error } = await supabase
+                    .from('messages')
+                    .select('*')
+                    .order('created_at', { ascending: true });
+
+                if (error) {
+                    console.error(error);
+                    return;
+                }
+
+                data.forEach(message => renderMessage(message));
+            }
+
+            loadMessages();
+        });
+    </script>
+</body>
+</html>
